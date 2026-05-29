@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandala Chart — Obsidian Plugin</title>
+<meta name="description" content="An interactive Mandala Chart plugin for Obsidian. Plan your goals with the 9×9 framework made famous by Shohei Ohtani.">
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --c-bg:      #0f0f13;
+    --c-surface: #1a1a22;
+    --c-card:    #22222e;
+    --c-border:  #333344;
+    --c-text:    #e8e8f0;
+    --c-muted:   #8888aa;
+    --c-accent:  #f9d800;
+    --radius:    12px;
+    /* Rainbow theme colors */
+    --t0: #FFBBBB; --t1: #FFD4A0; --t2: #EEFFB0; --t3: #FFB8DC;
+    --t4: #B0FFB8; --t5: #CCB0FF; --t6: #B0CCFF; --t7: #B0FFEE;
+    --t0l: #3a1010; --t1l: #3a2200; --t2l: #1a3000; --t3l: #3a0025;
+    --t4l: #0a2a0a; --t5l: #1a0a3a; --t6l: #0a1a3a; --t7l: #0a2a22;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif; background: var(--c-bg); color: var(--c-text); line-height: 1.6; min-height: 100vh; }
+
+  /* ===== Language Switcher ===== */
+  .lang-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: flex-end; align-items: center; padding: 10px 20px; background: rgba(15,15,19,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--c-border); gap: 6px; }
+  .lang-btn { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--c-border); background: transparent; color: var(--c-muted); font-size: 12px; cursor: pointer; transition: all 0.2s; }
+  .lang-btn:hover { color: var(--c-text); border-color: var(--c-text); }
+  .lang-btn.active { background: var(--c-accent); color: #222; border-color: var(--c-accent); font-weight: 700; }
+
+  /* ===== Hero ===== */
+  .hero { padding: 120px 24px 80px; text-align: center; max-width: 900px; margin: 0 auto; }
+  .hero-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; background: rgba(249,216,0,0.15); color: var(--c-accent); font-size: 13px; font-weight: 600; margin-bottom: 20px; border: 1px solid rgba(249,216,0,0.3); }
+  .hero h1 { font-size: clamp(2.2rem, 6vw, 4rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 20px; }
+  .hero h1 span { color: var(--c-accent); }
+  .hero p { font-size: clamp(1rem, 2.5vw, 1.25rem); color: var(--c-muted); max-width: 600px; margin: 0 auto 36px; }
+  .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: transform 0.15s, box-shadow 0.15s; }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary { background: var(--c-accent); color: #1a1200; box-shadow: 0 4px 20px rgba(249,216,0,0.3); }
+  .btn-secondary { background: var(--c-card); color: var(--c-text); border: 1px solid var(--c-border); }
+
+  /* ===== Mandala Preview ===== */
+  .preview-section { padding: 40px 24px 80px; display: flex; justify-content: center; }
+  .mandala-preview { display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); width: min(560px, 90vw); aspect-ratio: 1; border: 2px solid #444; border-radius: 8px; overflow: hidden; gap: 1.5px; background: #333; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+  .mp-cell { display: flex; align-items: center; justify-content: center; font-size: clamp(4px, 1.2vw, 7px); text-align: center; padding: 1px; line-height: 1.2; font-weight: 500; word-break: break-all; }
+  .mp-circle-host { padding: 8%; }
+  .mp-circle { width: 88%; aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 700; font-size: clamp(4px, 1.1vw, 7px); padding: 10%; border: 1px solid rgba(255,255,255,0.4); }
+
+  /* ===== Sections ===== */
+  section { max-width: 1000px; margin: 0 auto; padding: 60px 24px; }
+  section h2 { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 700; margin-bottom: 12px; }
+  section h2 span { color: var(--c-accent); }
+  .section-sub { color: var(--c-muted); margin-bottom: 40px; font-size: 1.05rem; }
+
+  /* ===== Feature Grid ===== */
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .feature-card { background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 24px; transition: border-color 0.2s, transform 0.2s; }
+  .feature-card:hover { border-color: var(--c-accent); transform: translateY(-3px); }
+  .feature-icon { font-size: 2rem; margin-bottom: 12px; }
+  .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+  .feature-card p { color: var(--c-muted); font-size: 0.9rem; line-height: 1.55; }
+
+  /* ===== Install Steps ===== */
+  .steps { counter-reset: step; display: flex; flex-direction: column; gap: 12px; }
+  .step { counter-increment: step; background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 20px 20px 20px 64px; position: relative; }
+  .step::before { content: counter(step); position: absolute; left: 18px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; background: var(--c-accent); color: #1a1200; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+  .step p { color: var(--c-muted); font-size: 0.9rem; }
+  code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.85em; }
+
+  /* ===== Color swatch ===== */
+  .color-ring { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+  .swatch { width: 56px; height: 56px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; text-align: center; border: 2px solid rgba(255,255,255,0.15); }
+
+  /* ===== Lang section ===== */
+  .lang-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .lang-card { background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 16px; text-align: center; }
+  .lang-flag { font-size: 2rem; margin-bottom: 8px; }
+  .lang-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+  .lang-native { color: var(--c-muted); font-size: 0.85rem; }
+
+  /* ===== Footer ===== */
+  footer { text-align: center; padding: 40px 24px; color: var(--c-muted); font-size: 0.85rem; border-top: 1px solid var(--c-border); }
+  footer a { color: var(--c-accent); text-decoration: none; }
+
+  /* ===== Divider ===== */
+  .divider { border: none; border-top: 1px solid var(--c-border); }
+</style>
+</head>
+<body>
+
+<!-- Language Bar -->
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('ja')">🇯🇵 日本語</button>
+  <button class="lang-btn" onclick="setLang('en')">🇺🇸 EN</button>
+  <button class="lang-btn" onclick="setLang('zh')">🇨🇳 中文</button>
+  <button class="lang-btn" onclick="setLang('ko')">🇰🇷 한국어</button>
+  <button class="lang-btn" onclick="setLang('es')">🇪🇸 ES</button>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge" data-i18n="badge">Obsidian Plugin</div>
+  <h1 data-i18n="title">Mandala <span>Chart</span></h1>
+  <p data-i18n="subtitle">大谷翔平で有名な曼荼羅チャートを、Obsidianでインタラクティブに作成・編集できるプラグイン。9×9グリッドで目標を構造化しよう。</p>
+  <div class="hero-buttons">
+    <a href="https://github.com/YOUR_USERNAME/obsidian-mandala-chart" class="btn btn-primary" data-i18n="cta_github">GitHub →</a>
+    <a href="obsidian://show-plugin?id=mandala-chart" class="btn btn-secondary" data-i18n="cta_install">Obsidianでインストール</a>
+  </div>
+</div>
+
+<!-- Mandala Preview (visual) -->
+<div class="preview-section">
+  <div class="mandala-preview" id="mandalaPreview"></div>
+</div>
+
+<!-- Features -->
+<section>
+  <h2 data-i18n="feat_title">主な<span>機能</span></h2>
+  <p class="section-sub" data-i18n="feat_sub">シンプルなクリック操作で、すべてを直感的に。</p>
+  <div class="features">
+    <div class="feature-card"><div class="feature-icon">🎯</div><h3 data-i18n="f1h">インタラクティブ9×9グリッド</h3><p data-i18n="f1p">セルをクリックするだけで編集。全81セルが画面いっぱいに広がります。</p></div>
+    <div class="feature-card"><div class="feature-icon">🔍</div><h3 data-i18n="f2h">2つの表示モード</h3><p data-i18n="f2p">全体表示でチャート全体を把握し、テーマ別詳細表示で深掘りできます。</p></div>
+    <div class="feature-card"><div class="feature-icon">🌈</div><h3 data-i18n="f3h">虹色グラデーション</h3><p data-i18n="f3p">8テーマが時計回りに赤→橙→黄緑→緑→青緑→青→紫→ピンクと並びます。</p></div>
+    <div class="feature-card"><div class="feature-icon">⭕</div><h3 data-i18n="f4h">円形デザイン</h3><p data-i18n="f4p">中央のテーマラベルはすべて美しい円形で表示。視覚的に区別しやすい。</p></div>
+    <div class="feature-card"><div class="feature-icon">🖨</div><h3 data-i18n="f5h">印刷対応</h3><p data-i18n="f5p">ボタン1つでA4横向きに最適化した印刷ページが開きます。</p></div>
+    <div class="feature-card"><div class="feature-icon">🌐</div><h3 data-i18n="f6h">5言語対応</h3><p data-i18n="f6p">Obsidianの言語設定を自動検出。日・英・中・韓・西に対応。</p></div>
+    <div class="feature-card"><div class="feature-icon">📌</div><h3 data-i18n="f7h">リボンアイコン</h3><p data-i18n="f7p">左サイドバーのアイコンをクリックするだけで専用タブが開きます。</p></div>
+    <div class="feature-card"><div class="feature-icon">📝</div><h3 data-i18n="f8h">ノート埋め込み</h3><p data-i18n="f8p">```mandalaコードブロックで、どのノートにも埋め込めます。</p></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Color Ring -->
+<section>
+  <h2 data-i18n="color_title">🌈 <span>虹色</span>カラーデザイン</h2>
+  <p class="section-sub" data-i18n="color_sub">8テーマが時計回りに虹のグラデーションを形成。中央は黄色で際立ちます。</p>
+  <div class="color-ring">
+    <div class="swatch" style="background:#FFBBBB;color:#7B1A1A;" data-i18n-sw="sw0">NW<br>赤</div>
+    <div class="swatch" style="background:#FFD4A0;color:#7B3A00;" data-i18n-sw="sw1">N<br>橙</div>
+    <div class="swatch" style="background:#EEFFB0;color:#3D6B00;" data-i18n-sw="sw2">NE<br>黄緑</div>
+    <div class="swatch" style="background:#B0FFB8;color:#1A6B1A;" data-i18n-sw="sw3">E<br>緑</div>
+    <div class="swatch" style="background:#B0FFEE;color:#1A6B58;" data-i18n-sw="sw4">SE<br>青緑</div>
+    <div class="swatch" style="background:#B0CCFF;color:#1A3D7B;" data-i18n-sw="sw5">S<br>青</div>
+    <div class="swatch" style="background:#CCB0FF;color:#3D1A7B;" data-i18n-sw="sw6">SW<br>紫</div>
+    <div class="swatch" style="background:#FFB8DC;color:#7B0050;" data-i18n-sw="sw7">W<br>ピンク</div>
+    <div class="swatch" style="background:#FFF176;color:#5C4A00;border-color:rgba(249,216,0,0.6);" data-i18n-sw="sw8">★<br>中央</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Install -->
+<section>
+  <h2 data-i18n="install_title">📦 <span>インストール</span></h2>
+  <p class="section-sub" data-i18n="install_sub">3ステップで使い始められます。</p>
+  <div class="steps">
+    <div class="step"><h3 data-i18n="s1h">Obsidianの設定を開く</h3><p data-i18n="s1p"><strong>設定 → コミュニティプラグイン</strong> を開き、セーフモードをオフにします。</p></div>
+    <div class="step"><h3 data-i18n="s2h">「Mandala Chart」を検索</h3><p data-i18n="s2p">「参照」をクリックして <code>Mandala Chart</code> を検索し、インストールします。</p></div>
+    <div class="step"><h3 data-i18n="s3h">有効化して完了！</h3><p data-i18n="s3p">プラグインを有効化すると、左サイドバーにアイコンが表示されます。</p></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Languages -->
+<section>
+  <h2 data-i18n="lang_title">🌐 <span>対応言語</span></h2>
+  <p class="section-sub" data-i18n="lang_sub">Obsidianの言語設定から自動検出します。</p>
+  <div class="lang-grid">
+    <div class="lang-card"><div class="lang-flag">🇯🇵</div><div class="lang-name">日本語</div><div class="lang-native">Japanese</div></div>
+    <div class="lang-card"><div class="lang-flag">🇺🇸</div><div class="lang-name">English</div><div class="lang-native">英語</div></div>
+    <div class="lang-card"><div class="lang-flag">🇨🇳</div><div class="lang-name">中文</div><div class="lang-native">Chinese</div></div>
+    <div class="lang-card"><div class="lang-flag">🇰🇷</div><div class="lang-name">한국어</div><div class="lang-native">Korean</div></div>
+    <div class="lang-card"><div class="lang-flag">🇪🇸</div><div class="lang-name">Español</div><div class="lang-native">Spanish</div></div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>Made with ❤️ for <a href="https://obsidian.md">Obsidian</a> · <a href="https://github.com/YOUR_USERNAME/obsidian-mandala-chart">GitHub</a> · MIT License</p>
+</footer>
+
+<script>
+// ===== i18n content =====
+const CONTENT = {
+  ja: {
+    badge: 'Obsidian Plugin',
+    title: 'Mandala <span>Chart</span>',
+    subtitle: '大谷翔平で有名な曼荼羅チャートを、Obsidianでインタラクティブに作成・編集できるプラグイン。9×9グリッドで目標を構造化しよう。',
+    cta_github: 'GitHub →',
+    cta_install: 'Obsidianでインストール',
+    feat_title: '主な<span>機能</span>',
+    feat_sub: 'シンプルなクリック操作で、すべてを直感的に。',
+    f1h:'インタラクティブ9×9グリッド', f1p:'セルをクリックするだけで編集。全81セルが画面いっぱいに広がります。',
+    f2h:'2つの表示モード', f2p:'全体表示でチャート全体を把握し、テーマ別詳細表示で深掘りできます。',
+    f3h:'虹色グラデーション', f3p:'8テーマが時計回りに赤→橙→黄緑→緑→青緑→青→紫→ピンクと並びます。',
+    f4h:'円形デザイン', f4p:'中央のテーマラベルはすべて美しい円形で表示。視覚的に区別しやすい。',
+    f5h:'印刷対応', f5p:'ボタン1つでA4横向きに最適化した印刷ページが開きます。',
+    f6h:'5言語対応', f6p:'Obsidianの言語設定を自動検出。日・英・中・韓・西に対応。',
+    f7h:'リボンアイコン', f7p:'左サイドバーのアイコンをクリックするだけで専用タブが開きます。',
+    f8h:'ノート埋め込み', f8p:'```mandalaコードブロックで、どのノートにも埋め込めます。',
+    color_title:'🌈 <span>虹色</span>カラーデザイン', color_sub:'8テーマが時計回りに虹のグラデーションを形成。中央は黄色で際立ちます。',
+    sw0:'NW<br>赤', sw1:'N<br>橙', sw2:'NE<br>黄緑', sw3:'E<br>緑', sw4:'SE<br>青緑', sw5:'S<br>青', sw6:'SW<br>紫', sw7:'W<br>ピンク', sw8:'★<br>中央',
+    install_title:'📦 <span>インストール</span>', install_sub:'3ステップで使い始められます。',
+    s1h:'Obsidianの設定を開く', s1p:'<strong>設定 → コミュニティプラグイン</strong>を開き、セーフモードをオフにします。',
+    s2h:'「Mandala Chart」を検索', s2p:'「参照」をクリックして <code>Mandala Chart</code> を検索し、インストールします。',
+    s3h:'有効化して完了！', s3p:'プラグインを有効化すると、左サイドバーにアイコンが表示されます。',
+    lang_title:'🌐 <span>対応言語</span>', lang_sub:'Obsidianの言語設定から自動検出します。',
+  },
+  en: {
+    badge: 'Obsidian Plugin',
+    title: 'Mandala <span>Chart</span>',
+    subtitle: 'An interactive Mandala Chart plugin for Obsidian. Structure your goals with the 9×9 framework made famous by Shohei Ohtani.',
+    cta_github: 'GitHub →',
+    cta_install: 'Install in Obsidian',
+    feat_title: 'Key <span>Features</span>',
+    feat_sub: 'Intuitive click-to-edit interface for your entire chart.',
+    f1h:'Interactive 9×9 Grid', f1p:'Click any cell to edit. The full 81-cell chart fills your screen.',
+    f2h:'Two View Modes', f2p:'Overview mode shows the full picture; focus mode zooms into each theme.',
+    f3h:'Rainbow Gradient Colors', f3p:'8 themes follow a clockwise rainbow: red → orange → lime → green → teal → blue → purple → pink.',
+    f4h:'Circle Design', f4p:'All theme labels are displayed as circles for clear visual distinction.',
+    f5h:'Print Ready', f5p:'One click opens a print-optimized A4 landscape page with all 81 cells.',
+    f6h:'5 Languages', f6p:'Auto-detects from your Obsidian locale. Japanese, English, Chinese, Korean, Spanish.',
+    f7h:'Ribbon Icon', f7p:'Click the grid icon in the left sidebar to open a dedicated tab instantly.',
+    f8h:'Note Embed', f8p:'Use ```mandala code blocks to embed a chart in any note.',
+    color_title:'🌈 <span>Rainbow</span> Color Design', color_sub:'8 themes form a clockwise rainbow gradient. The center goal stands out in yellow.',
+    sw0:'NW<br>Red', sw1:'N<br>Orange', sw2:'NE<br>Lime', sw3:'E<br>Green', sw4:'SE<br>Teal', sw5:'S<br>Blue', sw6:'SW<br>Purple', sw7:'W<br>Pink', sw8:'★<br>Center',
+    install_title:'📦 <span>Installation</span>', install_sub:'Up and running in 3 steps.',
+    s1h:'Open Obsidian Settings', s1p:'Go to <strong>Settings → Community Plugins</strong> and disable Safe Mode.',
+    s2h:'Search "Mandala Chart"', s2p:'Click Browse, search for <code>Mandala Chart</code>, and install.',
+    s3h:'Enable & Start!', s3p:'Enable the plugin and the icon will appear in your left sidebar.',
+    lang_title:'🌐 <span>Language</span> Support', lang_sub:'Auto-detected from your Obsidian language setting.',
+  },
+  zh: {
+    badge: 'Obsidian 插件',
+    title: '曼陀罗<span>图表</span>',
+    subtitle: '适用于Obsidian的交互式曼陀罗图表插件。用大谷翔平使之流行的9×9框架来规划您的目标。',
+    cta_github: 'GitHub →',
+    cta_install: '在Obsidian中安装',
+    feat_title: '主要<span>功能</span>',
+    feat_sub: '简单点击即可直觉操作整个图表。',
+    f1h:'交互式9×9网格', f1p:'点击任意格子即可编辑。81个格子铺满整个屏幕。',
+    f2h:'两种查看模式', f2p:'总览模式查看全局；焦点模式深入每个主题。',
+    f3h:'彩虹渐变色', f3p:'8个主题按顺时针顺序：红→橙→黄绿→绿→青→蓝→紫→粉。',
+    f4h:'圆形设计', f4p:'所有主题标签以圆形显示，视觉区分更清晰。',
+    f5h:'支持打印', f5p:'一键打开适合A4横向打印的页面。',
+    f6h:'5种语言', f6p:'自动检测Obsidian语言设置。支持日、英、中、韩、西班牙语。',
+    f7h:'侧边栏图标', f7p:'点击左侧边栏的图标即可打开专属标签页。',
+    f8h:'笔记嵌入', f8p:'使用```mandala代码块在任意笔记中嵌入图表。',
+    color_title:'🌈 <span>彩虹</span>配色设计', color_sub:'8个主题形成顺时针彩虹渐变。中心目标以黄色突出显示。',
+    sw0:'NW<br>红', sw1:'N<br>橙', sw2:'NE<br>黄绿', sw3:'E<br>绿', sw4:'SE<br>青', sw5:'S<br>蓝', sw6:'SW<br>紫', sw7:'W<br>粉', sw8:'★<br>中心',
+    install_title:'📦 <span>安装方法</span>', install_sub:'3步即可开始使用。',
+    s1h:'打开Obsidian设置', s1p:'前往 <strong>设置 → 第三方插件</strong>，关闭安全模式。',
+    s2h:'搜索"Mandala Chart"', s2p:'点击浏览，搜索 <code>Mandala Chart</code> 并安装。',
+    s3h:'启用并开始！', s3p:'启用插件后，左侧边栏将显示图标。',
+    lang_title:'🌐 <span>语言</span>支持', lang_sub:'自动从Obsidian语言设置中检测。',
+  },
+  ko: {
+    badge: 'Obsidian 플러그인',
+    title: '만다라 <span>차트</span>',
+    subtitle: '오타니 쇼헤이로 유명해진 만다라 차트를 Obsidian에서 인터랙티브하게 만들고 편집하는 플러그인. 9×9 그리드로 목표를 구조화하세요.',
+    cta_github: 'GitHub →',
+    cta_install: 'Obsidian에서 설치',
+    feat_title: '주요 <span>기능</span>',
+    feat_sub: '간단한 클릭으로 직관적으로 사용하세요.',
+    f1h:'인터랙티브 9×9 그리드', f1p:'셀을 클릭하여 편집. 81개의 셀이 화면 가득 펼쳐집니다.',
+    f2h:'두 가지 보기 모드', f2p:'전체 보기로 전체를 파악하고, 포커스 모드로 각 테마를 심층 탐구.',
+    f3h:'무지개 색상 그라데이션', f3p:'8개 테마가 시계 방향으로 빨→주→연두→초→청록→파→보→분홍.',
+    f4h:'원형 디자인', f4p:'모든 테마 레이블은 원형으로 표시되어 시각적으로 구별하기 쉽습니다.',
+    f5h:'인쇄 지원', f5p:'버튼 하나로 A4 가로 인쇄에 최적화된 페이지가 열립니다.',
+    f6h:'5개 언어 지원', f6p:'Obsidian 언어 설정에서 자동 감지. 일·영·중·한·스페인어 지원.',
+    f7h:'리본 아이콘', f7p:'왼쪽 사이드바의 아이콘을 클릭하면 전용 탭이 열립니다.',
+    f8h:'노트 내 삽입', f8p:'```mandala 코드 블록으로 어느 노트에나 삽입할 수 있습니다.',
+    color_title:'🌈 <span>무지개</span> 색상 디자인', color_sub:'8개 테마가 시계 방향으로 무지개 그라데이션을 형성. 중앙은 노란색으로 강조됩니다.',
+    sw0:'NW<br>빨강', sw1:'N<br>주황', sw2:'NE<br>연두', sw3:'E<br>초록', sw4:'SE<br>청록', sw5:'S<br>파랑', sw6:'SW<br>보라', sw7:'W<br>분홍', sw8:'★<br>중앙',
+    install_title:'📦 <span>설치 방법</span>', install_sub:'3단계로 시작할 수 있습니다.',
+    s1h:'Obsidian 설정 열기', s1p:'<strong>설정 → 커뮤니티 플러그인</strong>으로 이동하여 안전 모드를 끕니다.',
+    s2h:'"Mandala Chart" 검색', s2p:'"찾아보기"를 클릭하여 <code>Mandala Chart</code>를 검색하고 설치합니다.',
+    s3h:'활성화하고 시작!', s3p:'플러그인을 활성화하면 왼쪽 사이드바에 아이콘이 나타납니다.',
+    lang_title:'🌐 <span>지원 언어</span>', lang_sub:'Obsidian 언어 설정에서 자동으로 감지됩니다.',
+  },
+  es: {
+    badge: 'Plugin de Obsidian',
+    title: 'Gráfico <span>Mandala</span>',
+    subtitle: 'Un plugin interactivo de gráfico Mandala para Obsidian. Estructura tus metas con el framework 9×9 popularizado por Shohei Ohtani.',
+    cta_github: 'GitHub →',
+    cta_install: 'Instalar en Obsidian',
+    feat_title: '<span>Características</span> principales',
+    feat_sub: 'Interfaz intuitiva de clic para editar todo el gráfico.',
+    f1h:'Cuadrícula 9×9 interactiva', f1p:'Haz clic en cualquier celda para editar. Las 81 celdas llenan tu pantalla.',
+    f2h:'Dos modos de vista', f2p:'Vista general para ver todo; modo enfoque para profundizar en cada tema.',
+    f3h:'Colores degradado arcoíris', f3p:'8 temas en orden horario: rojo → naranja → amarillo → verde → cian → azul → morado → rosa.',
+    f4h:'Diseño circular', f4p:'Todas las etiquetas de temas se muestran como círculos para distinción visual.',
+    f5h:'Listo para imprimir', f5p:'Un clic abre una página optimizada para impresión A4 horizontal.',
+    f6h:'5 idiomas', f6p:'Detecta automáticamente tu configuración de Obsidian. Japonés, inglés, chino, coreano, español.',
+    f7h:'Icono en barra lateral', f7p:'Haz clic en el icono de cuadrícula para abrir una pestaña dedicada al instante.',
+    f8h:'Insertar en nota', f8p:'Usa bloques de código ```mandala para insertar un gráfico en cualquier nota.',
+    color_title:'🌈 Diseño de color <span>arcoíris</span>', color_sub:'8 temas forman un degradado arcoíris en sentido horario. El objetivo central destaca en amarillo.',
+    sw0:'NO<br>Rojo', sw1:'N<br>Naranja', sw2:'NE<br>Lima', sw3:'E<br>Verde', sw4:'SE<br>Cian', sw5:'S<br>Azul', sw6:'SO<br>Morado', sw7:'O<br>Rosa', sw8:'★<br>Centro',
+    install_title:'📦 <span>Instalación</span>', install_sub:'Listo en 3 pasos.',
+    s1h:'Abrir configuración de Obsidian', s1p:'Ve a <strong>Configuración → Plugins de la comunidad</strong> y desactiva el modo seguro.',
+    s2h:'Buscar "Mandala Chart"', s2p:'Haz clic en Explorar, busca <code>Mandala Chart</code> e instala.',
+    s3h:'¡Activar y comenzar!', s3p:'Activa el plugin y el icono aparecerá en tu barra lateral izquierda.',
+    lang_title:'🌐 <span>Idiomas</span> admitidos', lang_sub:'Detectado automáticamente desde tu configuración de idioma de Obsidian.',
+  }
+};
+
+let currentLang = 'ja';
+
+function setLang(lang) {
+  currentLang = lang;
+  const c = CONTENT[lang] || CONTENT.en;
+
+  // Update lang buttons
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes(`'${lang}'`));
+  });
+
+  // Update i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (c[key] !== undefined) el.innerHTML = c[key];
+  });
+
+  // Update swatch labels
+  document.querySelectorAll('[data-i18n-sw]').forEach(el => {
+    const key = el.getAttribute('data-i18n-sw');
+    if (c[key] !== undefined) el.innerHTML = c[key];
+  });
+
+  // Update html lang
+  document.documentElement.lang = lang;
+}
+
+// ===== Draw Mandala Preview =====
+function buildMandala() {
+  const MINI_GRID_MAP = [[0,1,2],[3,-1,4],[5,6,7]];
+  const A_GRID_BMAP   = [[0,1,2],[3,-1,4],[5,6,7]];
+
+  const COLORS = {
+    center: { bg: '#FFF176', text: '#5C4A00', border: '#F9D800' },
+    themes: [
+      { bg: '#FFBBBB', light: '#FFF5F5', text: '#7B1A1A' },
+      { bg: '#FFD4A0', light: '#FFF7F1', text: '#7B3A00' },
+      { bg: '#EEFFB0', light: '#FAFFEE', text: '#3D6B00' },
+      { bg: '#FFB8DC', light: '#FFF1F8', text: '#7B0050' },
+      { bg: '#B0FFB8', light: '#F4FFF5', text: '#1A6B1A' },
+      { bg: '#CCB0FF', light: '#F5F0FF', text: '#3D1A7B' },
+      { bg: '#B0CCFF', light: '#F0F5FF', text: '#1A3D7B' },
+      { bg: '#B0FFEE', light: '#F0FFFA', text: '#1A6B58' },
+    ]
+  };
+
+  // Sample data
+  const data = {
+    center: currentLang === 'ja' ? 'ゴール' : currentLang === 'zh' ? '目标' : currentLang === 'ko' ? '목표' : currentLang === 'es' ? 'Meta' : 'Goal',
+    themes: [
+      { label: currentLang === 'ja' ? '健康' : currentLang === 'zh' ? '健康' : currentLang === 'ko' ? '건강' : currentLang === 'es' ? 'Salud' : 'Health',
+        items: ['Sleep','Diet','Exercise','Meditate','Hydrate','Check-up','Rest','Walk'] },
+      { label: currentLang === 'ja' ? 'スキル' : currentLang === 'zh' ? '技能' : currentLang === 'ko' ? '스킬' : currentLang === 'es' ? 'Skills' : 'Skills',
+        items: ['Code','Design','Write','Speak','Learn','Read','Practice','Teach'] },
+      { label: currentLang === 'ja' ? '財務' : currentLang === 'zh' ? '财务' : currentLang === 'ko' ? '재무' : currentLang === 'es' ? 'Finanzas' : 'Finance',
+        items: ['Save','Invest','Budget','Reduce','Income','Tax','Fund','Track'] },
+      { label: currentLang === 'ja' ? '人脈' : currentLang === 'zh' ? '人脉' : currentLang === 'ko' ? '인맥' : currentLang === 'es' ? 'Red' : 'Network',
+        items: ['Meet','Share','Help','Event','Online','Local','Mentor','Connect'] },
+      { label: currentLang === 'ja' ? '創造' : currentLang === 'zh' ? '创造' : currentLang === 'ko' ? '창조' : currentLang === 'es' ? 'Crear' : 'Create',
+        items: ['Blog','Video','Art','Music','Code','Photo','Craft','Design'] },
+      { label: currentLang === 'ja' ? '習慣' : currentLang === 'zh' ? '习惯' : currentLang === 'ko' ? '습관' : currentLang === 'es' ? 'Hábitos' : 'Habits',
+        items: ['Morning','Journal','Plan','Review','Focus','Gratitude','Clean','Reflect'] },
+      { label: currentLang === 'ja' ? '学習' : currentLang === 'zh' ? '学习' : currentLang === 'ko' ? '학습' : currentLang === 'es' ? 'Aprender' : 'Learn',
+        items: ['Books','Course','Podcast','Language','Science','Art','History','Tech'] },
+      { label: currentLang === 'ja' ? '趣味' : currentLang === 'zh' ? '爱好' : currentLang === 'ko' ? '취미' : currentLang === 'es' ? 'Hobby' : 'Hobby',
+        items: ['Game','Cook','Travel','Sport','Music','Movie','Garden','Craft'] },
+    ]
+  };
+
+  const container = document.getElementById('mandalaPreview');
+  container.innerHTML = '';
+
+  function getItemIdx(r, c) {
+    return {'0,0':0,'0,1':1,'0,2':2,'1,0':3,'1,2':4,'2,0':5,'2,1':6,'2,2':7}[`${r},${c}`];
+  }
+
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      const mgr = Math.floor(row/3), mgc = Math.floor(col/3);
+      const lr = row % 3, lc = col % 3;
+      const ti = MINI_GRID_MAP[mgr][mgc];
+      const cell = document.createElement('div');
+
+      let isCircle = false, text = '', bg = '#1e1e28', fg = '#ccc';
+      let circleBg = '', circleText = '';
+
+      if (ti === -1) {
+        bg = '#FFFDE7';
+        if (lr === 1 && lc === 1) {
+          isCircle = true; text = data.center;
+          circleBg = COLORS.center.bg; circleText = COLORS.center.text;
+        } else {
+          const bi = A_GRID_BMAP[lr][lc];
+          if (bi >= 0) {
+            isCircle = true; text = data.themes[bi].label;
+            circleBg = COLORS.themes[bi].bg; circleText = COLORS.themes[bi].text;
+            bg = COLORS.themes[bi].light;
+          }
+        }
+      } else {
+        const clr = COLORS.themes[ti];
+        bg = clr.light;
+        if (lr === 1 && lc === 1) {
+          isCircle = true; text = data.themes[ti].label;
+          circleBg = clr.bg; circleText = clr.text;
+        } else {
+          const ii = getItemIdx(lr, lc);
+          text = data.themes[ti].items[ii] || ''; fg = clr.text;
+        }
+      }
+
+      if (isCircle) {
+        cell.className = 'mp-cell mp-circle-host';
+        cell.style.background = bg;
+        const circle = document.createElement('div');
+        circle.className = 'mp-circle';
+        circle.style.background = circleBg;
+        circle.style.color = circleText;
+        circle.textContent = text;
+        cell.appendChild(circle);
+      } else {
+        cell.className = 'mp-cell';
+        cell.style.background = bg;
+        cell.style.color = fg;
+        cell.textContent = text;
+      }
+
+      // Mini-grid borders
+      const bR = (col === 2 || col === 5) ? '2px solid #444' : '';
+      const bB = (row === 2 || row === 5) ? '2px solid #444' : '';
+      if (bR) cell.style.borderRight = bR;
+      if (bB) cell.style.borderBottom = bB;
+
+      container.appendChild(cell);
+    }
+  }
+}
+
+// Init
+buildMandala();
+setLang('ja');
+
+// Rebuild mandala when language changes (for sample labels)
+const origSetLang = setLang;
+window.setLang = function(lang) {
+  origSetLang(lang);
+  buildMandala();
+};
+setLang('ja');
+</script>
+</body>
+</html>
