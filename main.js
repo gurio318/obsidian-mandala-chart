@@ -462,18 +462,13 @@ h1{text-align:center;font-size:13pt;margin-bottom:3mm;color:#444;font-weight:700
   h1{font-size:11pt;margin-bottom:3mm}
   .grid{width:190mm;height:190mm;font-size:8pt}
   .c{font-size:8pt}
-  .circ{font-size:8pt}
-  .main-sq{font-size:8pt}
+  .circ{font-size:9pt!important;padding:3%!important}
+  .main-sq{font-size:10pt!important;padding:3%!important}
 }
 </style>
 </head><body><div class="wrap">
 <h1>${esc(t.printTitle)}${d.center?'：'+esc(d.center):''}</h1>
-<div class="grid" id="mg">${cells}</div></div>
-<script>
-function sz(){var g=document.getElementById('mg'),h=document.querySelector('h1');if(!g||!h)return;var s=Math.floor(Math.min(window.innerHeight-h.offsetHeight-h.offsetTop-24,window.innerWidth-24));if(s>0){g.style.width=s+'px';g.style.height=s+'px';}}
-sz();window.addEventListener('resize',sz);
-</script>
-</body></html>`;
+<div class="grid">${cells}</div></div></body></html>`;
   }
 }
 
