@@ -23,15 +23,16 @@
   min-height: 0;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
 }
-/* 専用タブの概要グリッド: 高さで制約 */
+/* 専用タブの概要グリッド: 縦横の短辺に合わせる */
 .is-mandala-view .mandala-overview {
-  width: auto;
-  height: 100%;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
   max-height: 100%;
   aspect-ratio: 1 / 1;
-  margin: 0;
+  margin: 0 auto;
 }
 /* 専用タブのフォーカスグリッド: 高さで制約 */
 .is-mandala-view .mandala-focus-grid {
@@ -86,14 +87,14 @@
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: 5px;
-  /* ビューポートの縦幅と横幅の小さい方に合わせる */
-  width: min(100%, calc(100svh - 160px));
+  /* 画面の短辺（縦横のmin）に合わせる */
+  width: min(100%, calc(100svh - 160px), calc(100svw - 32px));
+  max-height: min(calc(100svh - 160px), calc(100svw - 32px));
   aspect-ratio: 1 / 1;
   margin: 0 auto;
 }
 
 /* ミニグリッドのラッパー: border + 角丸 + クリッピングを一手に担う */
-/* ラッパー自身の border は自身の overflow:hidden の影響を受けないため確実に表示 */
 .mandala-mini-wrap {
   border: 2px solid transparent;
   border-radius: 8px;
@@ -117,7 +118,6 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  /* フォントサイズはクランプで画面幅に応じて変化 */
   font-size: clamp(8px, 1.2vw, 13px);
   cursor: pointer;
   word-break: break-all;
@@ -127,13 +127,10 @@
   padding: 1px;
 }
 .mandala-cell:hover { filter: brightness(0.88); }
-/* 直下の span だけ pointer-events: none（Markdown内リンクは通す） */
 .mandala-cell > span { pointer-events: none; display: block; }
 
-/* 通常のアイテムセル */
 .mandala-cell-item {}
 
-/* 概要グリッドの Markdown セル：フォントサイズを継承しコンパクトに */
 .mandala-cell .mandala-cell-md {
   width: 100%;
   overflow: hidden;
@@ -160,16 +157,10 @@
 .mandala-cell .mandala-cell-md h3 { font-weight: 700; }
 .mandala-cell .mandala-cell-md a.tag { opacity: 0.85; }
 
-/* ============================================
-   円形（中央セル）スタイル
-   ============================================ */
-
-/* 円を内包するホストセル */
 .mandala-cell-circle-host {
-  padding: 5%;  /* 少し余白を取って円が綺麗に見える */
+  padding: 5%;
 }
 
-/* 円本体 */
 .mandala-circle {
   width: 86%;
   aspect-ratio: 1 / 1;
@@ -187,7 +178,6 @@
   padding: 6%;
 }
 
-/* メインゴール（金色）*/
 .mandala-circle-main {
   font-size: clamp(9px, 1.4vw, 15px);
   font-weight: 800;
@@ -195,23 +185,18 @@
   box-shadow: 0 3px 10px rgba(255,160,64,0.4), inset 0 1px 3px rgba(255,255,255,0.5);
 }
 
-/* 中央メインゴールは四角形にオーバーライド */
 .mandala-square-main {
   border-radius: 8px;
   width: 90%;
   aspect-ratio: 1 / 1;
 }
 
-/* Bテーマ円（Aグリッド内・Bグリッド中央）*/
 .mandala-circle-theme {
   font-size: clamp(8px, 1.1vw, 13px);
   font-weight: 700;
   border-width: 2px;
 }
 
-/* ============================================
-   フォーカスモード
-   ============================================ */
 .mandala-focus-header {
   display: flex;
   align-items: center;
@@ -227,7 +212,6 @@
   line-height: 1.2;
 }
 
-/* テーマ切り替えピル */
 .mandala-focus-nav {
   display: flex;
   gap: 6px;
@@ -251,7 +235,6 @@
 .mandala-nav-pill:hover { opacity: 0.88; }
 .mandala-nav-pill.is-active { opacity: 1; }
 
-/* 大きな3×3グリッド */
 .mandala-focus-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -291,7 +274,6 @@
   border-width: 2.5px;
 }
 
-/* 空セルのプレースホルダー */
 .mandala-cell-placeholder {
   opacity: 0.2;
   font-size: 24px;
@@ -300,20 +282,14 @@
   pointer-events: none;
 }
 
-/* ============================================
-   Markdown セル内レンダリング
-   (#tag / ## 見出し / [[link]] 対応)
-   ============================================ */
 .mandala-cell-md {
   width: 100%;
   text-align: left;
   overflow: hidden;
-  /* クリックはセルホストが受けるが、リンクは通す */
   pointer-events: none;
 }
 .mandala-cell-md > * { pointer-events: auto; }
 
-/* 見出しをセルサイズに合わせて縮小 */
 .mandala-cell-md h1,
 .mandala-cell-md h2,
 .mandala-cell-md h3,
@@ -333,7 +309,6 @@
 .mandala-cell-md li { margin: 0; }
 .mandala-cell-md a.tag { font-size: 0.85em; opacity: 0.9; }
 
-/* ---- モーダル ---- */
 .mandala-modal-title {
   font-size: 15px;
   font-weight: 600;
