@@ -447,10 +447,10 @@ class MandalaRenderer {
 <title>${esc(t.printTitle)}${d.center?' - '+esc(d.center):''}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Hiragino Sans','Meiryo',Arial,sans-serif;background:#f0f0f0;display:flex;justify-content:center;align-items:flex-start;padding:8mm;min-height:100vh}
-.wrap{background:white;padding:6mm;display:flex;flex-direction:column;align-items:center}
-h1{text-align:center;font-size:14pt;margin-bottom:4mm;color:#444;font-weight:700}
-.grid{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);width:min(90vw,90vh);aspect-ratio:1/1;border:2px solid #888}
+body{font-family:'Hiragino Sans','Meiryo',Arial,sans-serif;background:#f0f0f0;display:flex;justify-content:center;align-items:flex-start;padding:6mm}
+.wrap{background:white;padding:4mm;display:flex;flex-direction:column;align-items:center}
+h1{text-align:center;font-size:13pt;margin-bottom:3mm;color:#444;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);width:min(92vw,calc(100vh - 40mm));aspect-ratio:1/1;border:2px solid #888}
 .c{display:flex;align-items:center;justify-content:center;font-size:clamp(6pt,1.5cqw,10pt);padding:2px;word-break:break-all;line-height:1.25;border:0.5px solid rgba(0,0,0,0.1);text-align:center;container-type:inline-size}
 .circ{width:84%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(6pt,1.4cqw,10pt);font-weight:700;padding:4%;word-break:break-all;border:1.5px solid rgba(255,255,255,0.6)}
 .main-sq{width:88%;aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(6pt,1.4cqw,11pt);font-weight:800;padding:4%;word-break:break-all;border:2px solid rgba(255,255,255,0.7)}
