@@ -9,9 +9,6 @@ var obsidian = require('obsidian');
 
 const VIEW_TYPE_MANDALA = 'mandala-chart-view';
 
-// ======================================================
-// i18n — Language strings
-// ======================================================
 const I18N = {
   ja: {
     ribbonTitle:  'マンダラチャートを開く',
@@ -135,7 +132,6 @@ const I18N = {
   }
 };
 
-/** Detect language from Obsidian/browser locale */
 function detectLang() {
   try {
     const locale = (window.moment && window.moment.locale())
@@ -144,7 +140,6 @@ function detectLang() {
     return I18N[code] || I18N.en;
   } catch(e) { return I18N.en; }
 }
-/** Detect language code (e.g. 'ja', 'en') */
 function detectLangCode() {
   try {
     const locale = (window.moment && window.moment.locale())
@@ -153,11 +148,18 @@ function detectLangCode() {
     return I18N[code] ? code : 'en';
   } catch(e) { return 'en'; }
 }
-FF1F8', text: '#7B0050', border: '#FF60AA' },  // 3 W  ピンク
-    { bg: '#B0FFB8', light: '#F4FFF5', text: '#1A6B1A', border: '#55FF66' },  // 4 E  緑
-    { bg: '#CCB0FF', light: '#F5F0FF', text: '#3D1A7B', border: '#9060FF' },  // 5 SW 紫
-    { bg: '#B0CCFF', light: '#F0F5FF', text: '#1A3D7B', border: '#5090FF' },  // 6 S  青
-    { bg: '#B0FFEE', light: '#F0FFFA', text: '#1A6B58', border: '#50FFCC' },  // 7 SE 青緑
+
+const COLORS = {
+  center: { bg: '#FFF176', text: '#5C4A00', border: '#F9D800' },
+  themes: [
+    { bg: '#FFBBBB', light: '#FFF5F5', text: '#7B1A1A', border: '#FF7070' },
+    { bg: '#FFD4A0', light: '#FFF7F1', text: '#7B3A00', border: '#FFB050' },
+    { bg: '#EEFFB0', light: '#FAFFEE', text: '#3D6B00', border: '#C8FF50' },
+    { bg: '#FFB8DC', light: '#FFF1F8', text: '#7B0050', border: '#FF60AA' },
+    { bg: '#B0FFB8', light: '#F4FFF5', text: '#1A6B1A', border: '#55FF66' },
+    { bg: '#CCB0FF', light: '#F5F0FF', text: '#3D1A7B', border: '#9060FF' },
+    { bg: '#B0CCFF', light: '#F0F5FF', text: '#1A3D7B', border: '#5090FF' },
+    { bg: '#B0FFEE', light: '#F0FFFA', text: '#1A6B58', border: '#50FFCC' },
   ]
 };
 
@@ -235,9 +237,7 @@ class MandalaRenderer {
     const wrap=el.createDiv({cls:'mandala-cell-md'});
     try {
       obsidian.MarkdownRenderer.render(this.app, text, wrap, this.sourcePath, this.component);
-    } catch(e) {
-      wrap.createEl('span',{text});
-    }
+    } catch(e) { wrap.createEl('span',{text}); }
   }
 
   editCell(title, value, onUpdate) {
@@ -365,7 +365,6 @@ class MandalaRenderer {
     title.style.color=col.text;
     hdr.createEl('button',{text:t.editThemeName,cls:'mandala-btn mandala-btn-sm'})
        .addEventListener('click',()=>{this.editCell(t.themeName,theme.theme,v=>{this.data.themes[ti].theme=v;});});
-
     const nav=area.createDiv({cls:'mandala-focus-nav'});
     for(let i=0;i<8;i++){
       const c=COLORS.themes[i];
@@ -374,10 +373,8 @@ class MandalaRenderer {
       if(i===ti) pill.style.boxShadow=`0 0 0 3px ${col.border}`;
       pill.addEventListener('click',()=>{this.focusIdx=i;this.render();});
     }
-
     const grid=area.createDiv({cls:'mandala-focus-grid'});
     grid.style.backgroundColor=col.light; grid.style.borderColor=col.border;
-
     for(let r=0;r<3;r++){
       for(let c=0;c<3;c++){
         const cell=grid.createDiv({cls:'mandala-focus-cell'});
@@ -431,18 +428,18 @@ class MandalaRenderer {
       for(let col=0;col<9;col++){
         const mgr=Math.floor(row/3),mgc=Math.floor(col/3),lr=row%3,lc=col%3;
         const ti=MINI_GRID_MAP[mgr][mgc];
-        let text='',cellBg='#fff',circleBg='',circleText='',isCircle=false;
+        let text='',cellBg='#fff',circleBg='',circleText='',isCircle=false,isMainGoal=false;
         const bR=(col===2||col===5)?'border-right:2px solid #bbb;':'';
         const bB=(row===2||row===5)?'border-bottom:2px solid #bbb;':'';
         if(ti===-1){
-          if(lr===1&&lc===1){text=d.center;isCircle=true;cellBg='#FFFDE7';circleBg=COLORS.center.bg;circleText=COLORS.center.text;}
+          if(lr===1&&lc===1){text=d.center;isCircle=true;isMainGoal=true;cellBg='#FFFDE7';circleBg=COLORS.center.bg;circleText=COLORS.center.text;}
           else{const bi=A_GRID_BMAP[lr][lc];if(bi>=0){text=d.themes[bi].theme;isCircle=true;cellBg=COLORS.themes[bi].light;circleBg=COLORS.themes[bi].bg;circleText=COLORS.themes[bi].text;}}
         } else {
           const clr=COLORS.themes[ti];
           if(lr===1&&lc===1){text=d.themes[ti].theme;isCircle=true;cellBg=clr.light;circleBg=clr.bg;circleText=clr.text;}
           else{const ii=getItemIndex(lr,lc);text=d.themes[ti].items[ii]||'';cellBg=clr.light;}
         }
-        if(isCircle) cells+=`<div class="c" style="background:${cellBg};${bR}${bB}"><div class="circ" style="background:${circleBg};color:${circleText}">${esc(text)}</div></div>`;
+        if(isCircle) cells+=`<div class="c" style="background:${cellBg};${bR}${bB}"><div class="${isMainGoal?'main-sq':'circ'}" style="background:${circleBg};color:${circleText}">${esc(text)}</div></div>`;
         else cells+=`<div class="c" style="background:${cellBg};${bR}${bB}">${esc(text)}</div>`;
       }
     }
@@ -456,6 +453,7 @@ h1{text-align:center;font-size:14pt;margin-bottom:4mm;color:#444;font-weight:700
 .grid{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);width:min(90vw,90vh);aspect-ratio:1/1;border:2px solid #888}
 .c{display:flex;align-items:center;justify-content:center;font-size:clamp(6pt,1.5cqw,10pt);padding:2px;word-break:break-all;line-height:1.25;border:0.5px solid rgba(0,0,0,0.1);text-align:center;container-type:inline-size}
 .circ{width:84%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(6pt,1.4cqw,10pt);font-weight:700;padding:4%;word-break:break-all;border:1.5px solid rgba(255,255,255,0.6)}
+.main-sq{width:88%;aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(6pt,1.4cqw,11pt);font-weight:800;padding:4%;word-break:break-all;border:2px solid rgba(255,255,255,0.7)}
 @media print{
   @page{size:A4 landscape;margin:8mm}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -465,6 +463,7 @@ h1{text-align:center;font-size:14pt;margin-bottom:4mm;color:#444;font-weight:700
   .grid{width:190mm;height:190mm;font-size:8pt}
   .c{font-size:8pt}
   .circ{font-size:8pt}
+  .main-sq{font-size:8pt}
 }
 </style>
 </head><body><div class="wrap">
