@@ -886,7 +886,7 @@ class MandalaRenderer {
 body{font-family:'Hiragino Sans','Meiryo',Arial,sans-serif;background:#f0f0f0;padding:10px;display:flex;justify-content:center}
 .wrap{background:white;padding:8px;display:inline-flex;flex-direction:column;align-items:center}
 h1{text-align:center;font-size:13pt;margin-bottom:6px;color:#444;font-weight:700;white-space:nowrap}
-.grid{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);aspect-ratio:1/1;border:2px solid #888}
+.grid{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);aspect-ratio:1/1;border:2px solid #888;width:min(90vw,80vh)}
 .c{display:flex;align-items:center;justify-content:center;font-size:clamp(6pt,1.5cqw,10pt);padding:2px;word-break:break-all;line-height:1.25;border:0.5px solid rgba(0,0,0,0.1);text-align:center;container-type:inline-size}
 .circ{width:84%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(6pt,1.4cqw,10pt);font-weight:700;padding:4%;word-break:break-all;border:1.5px solid rgba(255,255,255,0.6)}
 .main-sq{width:88%;aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(6pt,1.4cqw,11pt);font-weight:800;padding:4%;word-break:break-all;border:2px solid rgba(255,255,255,0.7)}
@@ -895,11 +895,11 @@ h1{text-align:center;font-size:13pt;margin-bottom:6px;color:#444;font-weight:700
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body{background:white;padding:0;display:block}
   .wrap{padding:0;display:block;text-align:center}
-  h1{font-size:10pt;margin-bottom:2mm;text-align:center}
-  .grid{width:177mm;height:177mm;font-size:8pt;display:grid;margin:0 auto}
-  .c{font-size:8pt}
-  .circ{font-size:9pt!important;padding:3%!important}
-  .main-sq{font-size:10pt!important;padding:3%!important}
+  h1{font-size:11pt;margin-bottom:3mm;text-align:center}
+  .grid{width:177mm!important;height:177mm!important;font-size:9pt;display:grid;margin:0 auto}
+  .c{font-size:9pt!important}
+  .circ{font-size:11pt!important;padding:3%!important;font-weight:700!important}
+  .main-sq{font-size:12pt!important;padding:3%!important;font-weight:900!important}
 }
 </style>
 </head><body><div class="wrap">
