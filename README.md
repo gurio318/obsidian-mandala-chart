@@ -1,5 +1,8 @@
 # Mandala Chart for Obsidian
 
+📖 **[Documentation / ドキュメント](https://gurio318.github.io/obsidian-mandala-chart/)**
+
+
 An interactive **Mandala Chart** plugin for [Obsidian](https://obsidian.md) — the 9×9 goal-planning framework popularized by baseball star Shohei Ohtani.
 
 **Languages / 言語:** 🇯🇵 日本語 · 🇺🇸 English · 🇨🇳 中文 · 🇰🇷 한국어 · 🇪🇸 Español  
