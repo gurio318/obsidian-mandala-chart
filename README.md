@@ -1,7 +1,8 @@
 # Mandala Chart for Obsidian
 
-📖 **[Documentation / ドキュメント](https://gurio318.github.io/obsidian-mandala-chart/)**
+![Mandala Chart Banner](docs/banner.png)
 
+📖 **[Documentation / ドキュメント](https://gurio318.github.io/obsidian-mandala-chart/)**
 
 An interactive **Mandala Chart** plugin for [Obsidian](https://obsidian.md) — the 9×9 goal-planning framework popularized by baseball star Shohei Ohtani.
 
@@ -24,6 +25,19 @@ A Mandala Chart is a 9×9 grid used for structured goal planning. You place your
 └───────────────────────────────┘
 Each T = a 3×3 sub-grid with 8 ideas
 ```
+
+---
+
+## Screenshots
+
+**Overview — 9×9 全体表示**
+![Overview](docs/screenshot-overview.jpg)
+
+**Focus Mode — テーマフォーカスモード**
+![Focus Mode](docs/screenshot-focus.jpg)
+
+**Edit Dialog — Markdown ライブプレビュー付き編集**
+![Edit Dialog](docs/screenshot-edit.jpg)
 
 ---
 
