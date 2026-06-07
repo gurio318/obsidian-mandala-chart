@@ -1,6 +1,6 @@
 # Mandala Chart for Obsidian
 
-![Mandala Chart Banner](docs/banner.png)
+![Mandala Chart Banner](https://raw.githubusercontent.com/gurio318/obsidian-mandala-chart/main/docs/banner.png)
 
 📖 **[Documentation / ドキュメント](https://gurio318.github.io/obsidian-mandala-chart/)**
 
@@ -20,13 +20,13 @@ A Mandala Chart is a 9×9 grid used for structured goal planning. You place your
 ## Screenshots
 
 **Overview — 9×9 全体表示**
-![Overview](docs/screenshot-overview.jpg)
+![Overview](https://raw.githubusercontent.com/gurio318/obsidian-mandala-chart/main/docs/screenshot-overview.jpg)
 
 **Focus Mode — テーマフォーカスモード**
-![Focus Mode](docs/screenshot-focus.jpg)
+![Focus Mode](https://raw.githubusercontent.com/gurio318/obsidian-mandala-chart/main/docs/screenshot-focus.jpg)
 
 **Edit Dialog — Markdown ライブプレビュー付き編集**
-![Edit Dialog](docs/screenshot-edit.jpg)
+![Edit Dialog](https://raw.githubusercontent.com/gurio318/obsidian-mandala-chart/main/docs/screenshot-edit.jpg)
 
 ---
 
