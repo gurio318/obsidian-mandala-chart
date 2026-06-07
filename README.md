@@ -15,17 +15,6 @@ An interactive **Mandala Chart** plugin for [Obsidian](https://obsidian.md) — 
 
 A Mandala Chart is a 9×9 grid used for structured goal planning. You place your **main goal** in the center, surround it with **8 key themes**, and then expand each theme into **8 supporting ideas** — giving you 64 action items at a glance.
 
-```
-┌───────────────────────────────┐
-│  T0  │  T1  │  T2  │         │
-│──────┼──────┼──────┤         │
-│  T3  │ GOAL │  T4  │  ...    │
-│──────┼──────┼──────┤         │
-│  T5  │  T6  │  T7  │         │
-└───────────────────────────────┘
-Each T = a 3×3 sub-grid with 8 ideas
-```
-
 ---
 
 ## Screenshots
